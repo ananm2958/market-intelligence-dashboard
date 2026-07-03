@@ -1,32 +1,24 @@
-import { useNavigate } from 'react-router-dom';
-import { Button } from '../components/ui/Button';
-import { signOut } from '../lib/auth';
+import { useState } from "react";
+import { useStockData } from "../lib/useStockData";
+import StockChart from "../components/StockChart";
+import QuoteCard from "../components/QuoteCard";
+import TickerSearch from "../components/TickerSearch";
 
-export function DashboardPage() {
-  const navigate = useNavigate();
-
-  function handleSignOut() {
-    signOut();
-    navigate('/');
-  }
+export default function Dashboard() {
+  const [symbol, setSymbol] = useState("AAPL");
+  const { quote, prices, loading, error } = useStockData(symbol);
 
   return (
-    <div className="dashboard-layout">
-      <header className="dashboard-header">
-        <span className="dashboard-brand">Market Intelligence</span>
-        <Button variant="ghost" type="button" onClick={handleSignOut}>
-          Sign out
-        </Button>
-      </header>
-      <main className="dashboard-main">
-        <div className="dashboard-placeholder">
-          <h1>Dashboard coming soon</h1>
-          <p>
-            Your market intelligence workspace is under construction. Check back
-            soon for analytics, feeds, and insights.
-          </p>
-        </div>
-      </main>
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-semibold">Market Dashboard</h1>
+
+      <TickerSearch onSelect={setSymbol} />
+
+      {loading && <p className="text-gray-400">Loading...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      {quote && <QuoteCard quote={quote} symbol={symbol} />}
+      {prices.length > 0 && <StockChart data={prices} symbol={symbol} />}
     </div>
   );
 }
