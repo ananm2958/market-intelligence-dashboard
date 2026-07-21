@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AssetType {
+  STOCK
+  CRYPTO
+}
+
+model User {
+  id         String      @id @default(cuid())
+  email      String      @unique
+  password   String
+  watchlists Watchlist[]
+  createdAt  DateTime    @default(now())
+}
+
+model Watchlist {
+  id     String          @id @default(cuid())
+  name   String
+  userId String
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items  WatchlistItem[]
+
+  @@index([userId])
+}
+
+model WatchlistItem {
+  id          String    @id @default(cuid())
+  symbol      String
+  assetType   AssetType
+  watchlistId String
+  watchlist   Watchlist @relation(fields: [watchlistId], references: [id], onDelete: Cascade)
+
+  @@unique([watchlistId, symbol, assetType])
+  @@index([symbol, assetType])
+}
+
+model PriceSnapshot {
+  id        String    @id @default(cuid())
+  symbol    String
+  assetType AssetType
+  price     Decimal   @db.Decimal(18, 8)
+  change    Decimal?  @db.Decimal(18, 8)
+  changePct Decimal?  @db.Decimal(8, 4)
+  volume    BigInt?
+  fetchedAt DateTime  @default(now())
+
+  @@index([symbol, assetType, fetchedAt(sort: Desc)])
+  @@index([fetchedAt])
+}
+
+model DailyPrice {
+  id        String    @id @default(cuid())
+  symbol    String
+  assetType AssetType
+  date      DateTime  @db.Date
+  open      Decimal   @db.Decimal(18, 8)
+  high      Decimal   @db.Decimal(18, 8)
+  low       Decimal   @db.Decimal(18, 8)
+  close     Decimal   @db.Decimal(18, 8)
+  volume    BigInt?
+
+  @@unique([symbol, assetType, date])
+  @@index([symbol, assetType, date(sort: Desc)])
+}
+
+model TrackedSymbol {
+  symbol    String    @id
+  assetType AssetType
+  active    Boolean   @default(true)
+
+  @@index([active, assetType])
+}

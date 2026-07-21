@@ -1,0 +1,2 @@
+import { useState, type FormEvent } from 'react';
+export function TickerSearch({ onSelect }: { onSelect: (symbol: string) => void }) { const [value, setValue] = useState('AAPL'); function submit(event: FormEvent) { event.preventDefault(); const symbol = value.trim(); if (symbol) onSelect(symbol); } return <form className="ticker-search" onSubmit={submit}><label htmlFor="ticker">Symbol</label><input id="ticker" value={value} onChange={(event) => setValue(event.target.value)} placeholder="AAPL" /><button className="btn btn-primary" type="submit">Load</button></form>; }

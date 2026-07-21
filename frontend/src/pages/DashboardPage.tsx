@@ -1,24 +1,21 @@
 import { useState } from "react";
+import { Layout } from "../components/Layout";
+import { TickerSearch } from "../components/TickerSearch";
+import { QuoteCard } from "../components/QuoteCard";
+import { StockChart } from "../components/StockChart";
+import { WatchlistPanel } from "../components/WatchlistPanel";
 import { useStockData } from "../lib/useStockData";
-import StockChart from "../components/StockChart";
-import QuoteCard from "../components/QuoteCard";
-import TickerSearch from "../components/TickerSearch";
 
-export default function Dashboard() {
+export function DashboardPage() {
   const [symbol, setSymbol] = useState("AAPL");
   const { quote, prices, loading, error } = useStockData(symbol);
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">Market Dashboard</h1>
-
-      <TickerSearch onSelect={setSymbol} />
-
-      {loading && <p className="text-gray-400">Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-
-      {quote && <QuoteCard quote={quote} symbol={symbol} />}
-      {prices.length > 0 && <StockChart data={prices} symbol={symbol} />}
-    </div>
+    <Layout>
+      <div className="dashboard-grid">
+        <main><TickerSearch onSelect={setSymbol} />{loading && <p>Loading market data…</p>}{error && <p className="error-message">{error}</p>}{quote && <QuoteCard quote={quote} />}{prices.length > 0 && <StockChart data={prices} symbol={symbol} />}</main>
+        <WatchlistPanel onSelect={setSymbol} />
+      </div>
+    </Layout>
   );
 }

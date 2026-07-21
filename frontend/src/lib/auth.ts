@@ -1,11 +1,11 @@
-const AUTH_KEY = 'auth';
+const AUTH_KEY = 'market-authenticated';
 
 export function isAuthenticated(): boolean {
-  return sessionStorage.getItem(AUTH_KEY) === 'mock';
+  return sessionStorage.getItem(AUTH_KEY) === 'true';
 }
 
 export function signIn(): void {
-  sessionStorage.setItem(AUTH_KEY, 'mock');
+  sessionStorage.setItem(AUTH_KEY, 'true');
 }
 
 export function signOut(): void {

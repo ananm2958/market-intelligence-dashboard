@@ -1,42 +1,29 @@
-import { useEffect, useState } from "react";
-import { getQuote, getDailyPrices } from "./alphaVantage";
+import { useEffect, useState } from 'react';
+import { api } from './api';
+import type { HistoryBar, Quote } from './types';
 
 export function useStockData(symbol: string) {
-  const [quote, setQuote] = useState<any>(null);
-  const [prices, setPrices] = useState<any[]>([]);
+  const [quote, setQuote] = useState<Quote | null>(null);
+  const [prices, setPrices] = useState<HistoryBar[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!symbol) return;
 
-    async function fetch() {
+    async function load() {
       try {
-        setLoading(true);
-        const [quoteData, priceData] = await Promise.all([
-          getQuote(symbol),
-          getDailyPrices(symbol),
-        ]);
-
-        setQuote(quoteData);
-
-        const formatted = Object.entries(priceData)
-          .slice(0, 30) 
-          .map(([date, values]: [string, any]) => ({
-            date,
-            close: parseFloat(values["4. close"]),
-          }))
-          .reverse(); 
-
-        setPrices(formatted);
-      } catch (err) {
+        setLoading(true); setError(null);
+        const [quoteData, history] = await Promise.all([api.quote(symbol), api.history(symbol)]);
+        setQuote(quoteData); setPrices(history);
+      } catch {
         setError("Failed to fetch stock data");
       } finally {
         setLoading(false);
       }
     }
 
-    fetch();
+    void load();
   }, [symbol]);
 
   return { quote, prices, loading, error };
